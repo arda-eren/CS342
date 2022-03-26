@@ -4,13 +4,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pthread.h>
-//#include "defs.h"
+#include "scheduler_definitions.h"
 
-char *alg; //Scheduling algorithm type
+scheduling_algorithm alg; //Scheduling algorithm type
 int q; //Time quantum
 int t1; //Service time for IO device 1
 int t2; //Service time for IO device 2
-char *burst_dist; //Burst distribution type
+burst_distribution_type burst_dist; //Burst distribution type
 int burst_len; //Burst length
 int min_burst; //Minimum burst length
 int max_burst; //Maximum burst length
