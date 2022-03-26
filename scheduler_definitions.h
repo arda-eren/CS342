@@ -8,6 +8,7 @@
 typedef struct PCB{
     int pid;
     pthread_t thread_id;
+    process_state process_state;
     int next_CPU_burst_length;
     int remaining_CPU_burst_length;
     int burst_length_count;
