@@ -20,16 +20,6 @@ typedef struct PCB{
     int total_time_in_cpu;
 }PCB;
 
-
-//Defines the type of burst distribution
-//used to seperate distributions easily
-typedef enum burst_distribution_type{
-    UNIFORM,
-    EXPONENTIAL,
-    FIXED
-}burst_distribution_type;
-
-
 //Defines the type of process states
 //used to seperate the states of processes easily
 typedef enum process_state{
