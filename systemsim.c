@@ -84,7 +84,7 @@ void* p_thread_func(void *arg){
     pthread_exit(NULL);
 }
 
-//TODO: Implement the function that will generate new processes
+//Function that will generate new processes
 void* generate_processes(void *arg){
     int total_thread_count = 0;
     
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]){
         pthread_join(process_generator, NULL);
         pthread_create(&cpu_scheduler, NULL, cpu_scheduler, NULL);
         pthread_join(cpu_scheduler, NULL);
-
+        return 1;
     }
     
 }
