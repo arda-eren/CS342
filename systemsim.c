@@ -143,17 +143,23 @@ int main(int argc, char *argv[]){
         printf("Invalid number of arguments\n");
         return 1;
     } else {
-        if (argv[1] == "fcfs"){
+        if (argv[1] == "FCFS"){
             alg = FCFS;
-        } else if (argv[1] == "sjf"){
+        } else if (argv[1] == "SJF"){
             alg = SJF;
-        } else if (argv[1] == "rr"){
+        } else if (argv[1] == "RR"){
             alg = RR;
         } else {
             printf("Invalid scheduling algorithm\n");
             return 1;
         }
-        q = atoi(argv[2]);
+        if (strcmp(argv[2], "INF"))
+        {
+            q = 1;
+        } else {
+            q = atoi(argv[2]);
+        }
+        
         t1 = atoi(argv[3]);
         t2 = atoi(argv[4]);
         if (strcmp(argv[5], "uniform") != 0 && strcmp(argv[5], "exponential") != 0 && strcmp(argv[5], "fixed") != 0){
