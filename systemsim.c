@@ -143,11 +143,11 @@ int main(int argc, char *argv[]){
         printf("Invalid number of arguments\n");
         return 1;
     } else {
-        if (argv[1] == "FCFS"){
+        if (strcmp(argv[1], "FCFS") == 0){
             alg = FCFS;
-        } else if (argv[1] == "SJF"){
+        } else if (strcmp(argv[1], "SJF") == 0){
             alg = SJF;
-        } else if (argv[1] == "RR"){
+        } else if (strcmp(argv[1], "RR") == 0){
             alg = RR;
         } else {
             printf("Invalid scheduling algorithm\n");
