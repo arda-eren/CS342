@@ -34,26 +34,6 @@ pthread_cond_t cond_io1; //Condition variable for threads in io1 queue
 pthread_cond_t cond_io2; //Condition variable for threads in io2 queue
 int current_thread_count; //Number of threads created
 int current_time; //Current time
-int* pid_list; //List of pids
-
- void* initialize_list(int *pid_list){
-    pid_list = malloc(sizeof(int) * maxp);
-    for(int i = 0; i < maxp; i++){
-        pid_list[i] = -1;
-    }
-    return NULL;
-}
-
-int set_pid(int *pid_list){
-    for (int i = 0; i < maxp; i++)
-    {
-        if (pid_list[i] == -1)
-        {
-            pid_list[i] = i;
-            return i;
-        }
-    }
-}
 
 void* p_thread_func(void *arg){
     PCB *pcb = (PCB*)arg;
@@ -78,10 +58,11 @@ void* p_thread_func(void *arg){
         pcb->next_CPU_burst_length = burst_len;
     }
 
-    printf("%s", "Thread with pid: %d", pcb->pid);
+    printf("Thread with pid: %d\n", pcb->pid);
     //TODO: Enqueue the PCB into the ready queue
     current_thread_count--;
     pthread_exit(NULL);
+    return NULL;
 }
 
 //Function that will generate new processes
@@ -93,9 +74,7 @@ void* generate_processes(void *arg){
        for (int i = 0; i < maxp; i++)
        {
             PCB *pcb = (PCB*)malloc(sizeof(PCB));
-            int temp = set_pid(pid_list);
-            pcb->pid = temp;
-            pthread_create(&threads[temp], NULL, p_thread_func, (void*) pcb);
+            pthread_create(&threads[i], NULL, p_thread_func, (void*) pcb);
             current_thread_count++;
             total_thread_count++;
        }            
@@ -103,9 +82,8 @@ void* generate_processes(void *arg){
         for (size_t i = 0; i < 10; i++)
         {
             PCB *pcb = (PCB*)malloc(sizeof(PCB));
-            int temp = set_pid(pid_list);
-            pcb->pid = temp;
-            pthread_create(&threads[temp], NULL, p_thread_func, (void*) pcb);
+            pcb->pid = i;
+            pthread_create(&threads[i], NULL, p_thread_func, (void*) pcb);
             current_thread_count++;
             total_thread_count++;
         }
@@ -141,7 +119,8 @@ int main(int argc, char *argv[]){
     if (argc != 16){
         printf("Invalid number of arguments\n");
         return 1;
-    } else {
+    } 
+    else {
         if (strcmp(argv[1], "FCFS") == 0){
             alg = FCFS;
         } else if (strcmp(argv[1], "SJF") == 0){
@@ -180,30 +159,36 @@ int main(int argc, char *argv[]){
         pg = atof(argv[12]);
         maxp = atoi(argv[13]);
         allp = atoi(argv[14]);
+
         if (maxp > allp || maxp < 1 || maxp > 50 || allp < 1 || allp > 1000){
             printf("Invalid allp, maxp arguments\n");
             return 1;
         }
+
         if(argv[15] >= 1 || argv[15] <= 3){
             outmode = atoi(argv[15]);
         } else {
             printf("Invalid outmode argument\n");
             return 1;
         }
+
+        printf("Valid arguments\n");
         threads = (pthread_t*)malloc(sizeof(pthread_t) * allp);
-        initialize_list(pid_list);
+        printf("Threads allocated\n"); 
+        printf("Pid_list initialized");
         pthread_t process_generator; //Process generator thread
         pthread_t scheduler; //CPU scheduler thread
         pthread_create(&process_generator, NULL, &generate_processes, NULL);
         pthread_join(process_generator, NULL);
+
         for (int i = 0; i < maxp; i++)
         {
             pthread_join(threads[i], NULL);
         }
+
         pthread_create(&scheduler, NULL, &cpu_scheduler, NULL);
-        pthread_join(cpu_scheduler, NULL);
-        return 1;
+        pthread_join(scheduler, NULL);
     }
-    
+    return 1;
 }
 
