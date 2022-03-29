@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
-#include "scheduler_definitions.h"
+#include "scheduler_defs.h"
 
 //NODE DEFINITIONS AND METHODS
 
