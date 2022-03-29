@@ -36,12 +36,12 @@ int current_thread_count; //Number of threads created
 int current_time; //Current time
 int* pid_list; //List of pids
 
- void initialize_list(int *pid_list){
+ void* initialize_list(int *pid_list){
     pid_list = malloc(sizeof(int) * maxp);
     for(int i = 0; i < maxp; i++){
         pid_list[i] = -1;
     }
-    return pid_list;
+    return NULL;
 }
 
 int set_pid(int *pid_list){
