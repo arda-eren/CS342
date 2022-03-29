@@ -1,5 +1,5 @@
 project2: systemsim.o
-	gcc -pthread -o project2 systemsim.c
+	gcc -o project2 systemsim.c -pthread
 systemsim.o:
 	gcc -c systemsim.c
 clean:
