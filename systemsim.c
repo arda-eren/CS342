@@ -71,13 +71,17 @@ void* p_thread_func(void *arg){
         pcb->remaining_CPU_burst_length = rand() % (max_burst - min_burst + 1) + min_burst;
         pcb->next_CPU_burst_length = (rand() % (max_burst - min_burst + 1)) + min_burst;
     } else if (strcmp(burst_dist, "exponential") == 0){
-        pcb->remaining_CPU_burst_length = (int)(-1 * log(1 - ((float)rand() / RAND_MAX)) * (max_burst - min_burst + 1)) + min_burst;
-        pcb->next_CPU_burst_length = (int)(-1 * log(1 - ((float)rand() / RAND_MAX)) * (max_burst - min_burst + 1)) + min_burst; 
+        //pcb->remaining_CPU_burst_length = (int)(-1 * log(1 - ((float)rand() / RAND_MAX)) * (max_burst - min_burst + 1)) + min_burst;
+        //pcb->next_CPU_burst_length = (int)(-1 * log(1 - ((float)rand() / RAND_MAX)) * (max_burst - min_burst + 1)) + min_burst; 
     } else if (strcmp(burst_dist, "fixed") == 0){
         pcb->remaining_CPU_burst_length = burst_len;
         pcb->next_CPU_burst_length = burst_len;
     }
+
+    printf("%s", "Thread with pid: %d", pcb->pid);
     //TODO: Enqueue the PCB into the ready queue
+    current_thread_count--;
+    pthread_exit(NULL);
 }
 
 //TODO: Implement the function that will generate new processes

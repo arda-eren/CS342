@@ -3,6 +3,14 @@
 #include <pthread.h>
 
 
+//Defines the type of process states
+//used to seperate the states of processes easily
+typedef enum process_state{
+    WAITING,
+    READY,
+    RUNNING
+}process_state;
+
 //Definition for the process control block
 //holds information about the related thread
 typedef struct PCB{
@@ -19,14 +27,6 @@ typedef struct PCB{
     int finish_time;
     int total_time_in_cpu;
 }PCB;
-
-//Defines the type of process states
-//used to seperate the states of processes easily
-typedef enum process_state{
-    WAITING,
-    READY,
-    RUNNING
-}process_state;
 
 
 //Defines the scheduling algorithm to be run
