@@ -36,7 +36,7 @@ int current_thread_count; //Number of threads created
 int current_time; //Current time
 int* pid_list; //List of pids
 
-int* initialize_list(int *pid_list){
+ void initialize_list(int *pid_list){
     pid_list = malloc(sizeof(int) * maxp);
     for(int i = 0; i < maxp; i++){
         pid_list[i] = -1;
@@ -78,8 +78,6 @@ void* p_thread_func(void *arg){
         pcb->next_CPU_burst_length = burst_len;
     }
     //TODO: Enqueue the PCB into the ready queue
-    current_thread_count--;
-    pthread_exit(NULL);
 }
 
 //TODO: Implement the function that will generate new processes
@@ -136,5 +134,63 @@ void* generate_processes(void *arg){
 void* cpu_scheduler(void *arg){}
 
 //TODO: Implement the main function
-int main(int argc, char *argv[]){}
+int main(int argc, char *argv[]){
+    if (argc != 16){
+        printf("Invalid number of arguments\n");
+        return 1;
+    } else {
+        if (argv[1] == "fcfs"){
+            alg = FCFS;
+        } else if (argv[1] == "sjf"){
+            alg = SJF;
+        } else if (argv[1] == "rr"){
+            alg = RR;
+        } else {
+            printf("Invalid scheduling algorithm\n");
+            return 1;
+        }
+        q = atoi(argv[2]);
+        t1 = atoi(argv[3]);
+        t2 = atoi(argv[4]);
+        if (strcmp(argv[5], "uniform") != 0 && strcmp(argv[5], "exponential") != 0 && strcmp(argv[5], "fixed") != 0){
+            printf("Invalid burst distribution argument\n");
+            return 1;
+        } else {
+            burst_dist = argv[5];
+        }
+        min_burst = atoi(argv[6]);
+        max_burst = atoi(argv[7]);
+        burst_len = atoi(argv[8]);
+        p0 = atof(argv[9]);
+        p1 = atof(argv[10]);
+        p2 = atof(argv[11]);
+        if (p0 + p1 + p2 != 1){
+            printf("Invalid p0, p1, p2 arguments\n");
+            return 1;
+        }
+        pg = atof(argv[12]);
+        maxp = atoi(argv[13]);
+        allp = atoi(argv[14]);
+        if (maxp > allp || maxp < 1 || maxp > 50 || allp < 1 || allp > 1000){
+            printf("Invalid allp, maxp arguments\n");
+            return 1;
+        }
+        if(argv[15] >= 1 && argv[15] <= 3){
+            outmode = atoi(argv[15]);
+        } else {
+            printf("Invalid outmode argument\n");
+            return 1;
+        }
+        threads = (pthread_t*)malloc(sizeof(pthread_t) * allp);
+        initialize_list(pid_list);
+        pthread_t process_generator; //Process generator thread
+        pthread_t cpu_scheduler; //CPU scheduler thread
+        pthread_create(&process_generator, NULL, generate_processes, NULL);
+        pthread_join(process_generator, NULL);
+        pthread_create(&cpu_scheduler, NULL, cpu_scheduler, NULL);
+        pthread_join(cpu_scheduler, NULL);
+
+    }
+    
+}
 
