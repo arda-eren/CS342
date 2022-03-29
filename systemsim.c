@@ -185,7 +185,7 @@ int main(int argc, char *argv[]){
             printf("Invalid allp, maxp arguments\n");
             return 1;
         }
-        if(argv[15] >= 1 && argv[15] <= 3){
+        if(argv[15] >= 1 || argv[15] <= 3){
             outmode = atoi(argv[15]);
         } else {
             printf("Invalid outmode argument\n");
