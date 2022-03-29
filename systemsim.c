@@ -132,7 +132,9 @@ void* generate_processes(void *arg){
 }
 
 //TODO: Implement the cpu scheduler
-void* cpu_scheduler(void *arg){}
+void* cpu_scheduler(void *arg){
+    return NULL;
+}
 
 //TODO: Implement the main function
 int main(int argc, char *argv[]){
