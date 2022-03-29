@@ -96,7 +96,6 @@ void* generate_processes(void *arg){
             int temp = set_pid(pid_list);
             pcb->pid = temp;
             pthread_create(&threads[temp], NULL, p_thread_func, (void*) pcb);
-            pthread_join(threads[temp], NULL);
             current_thread_count++;
             total_thread_count++;
        }            
@@ -107,7 +106,6 @@ void* generate_processes(void *arg){
             int temp = set_pid(pid_list);
             pcb->pid = temp;
             pthread_create(&threads[temp], NULL, p_thread_func, (void*) pcb);
-            pthread_join(threads[temp], NULL);
             current_thread_count++;
             total_thread_count++;
         }
@@ -125,7 +123,6 @@ void* generate_processes(void *arg){
                 PCB *pcb = (PCB*)malloc(sizeof(PCB));
                 pcb->pid = total_thread_count; //TODO: available pid finder for threads will be used here
                 pthread_create(&threads[total_thread_count], NULL, p_thread_func, (void*) pcb);
-                pthread_join(threads[total_thread_count], NULL);
                 current_thread_count++;
                 total_thread_count++;
             }
@@ -194,10 +191,14 @@ int main(int argc, char *argv[]){
         threads = (pthread_t*)malloc(sizeof(pthread_t) * allp);
         initialize_list(pid_list);
         pthread_t process_generator; //Process generator thread
-        pthread_t cpu_scheduler; //CPU scheduler thread
-        pthread_create(&process_generator, NULL, generate_processes, NULL);
+        pthread_t scheduler; //CPU scheduler thread
+        pthread_create(&process_generator, NULL, &generate_processes, NULL);
         pthread_join(process_generator, NULL);
-        pthread_create(&cpu_scheduler, NULL, cpu_scheduler, NULL);
+        for (int i = 0; i < maxp; i++)
+        {
+            pthread_join(threads[i], NULL);
+        }
+        pthread_create(&scheduler, NULL, &cpu_scheduler, NULL);
         pthread_join(cpu_scheduler, NULL);
         return 1;
     }
