@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pthread.h>
-#include "scheduler_definitions.h"
+#include "scheduler_defs.h"
 
 scheduling_algorithm alg; //Scheduling algorithm type
 int q; //Time quantum
@@ -32,8 +32,28 @@ pthread_mutex_t mutex_io2; //Mutex for threads in io2 queue
 pthread_cond_t cond_rq; //Condition variable for threads in ready queue
 pthread_cond_t cond_io1; //Condition variable for threads in io1 queue
 pthread_cond_t cond_io2; //Condition variable for threads in io2 queue
-int thread_count; //Number of threads created
+int current_thread_count; //Number of threads created
 int current_time; //Current time
+int* pid_list; //List of pids
+
+int* initialize_list(int *pid_list){
+    pid_list = malloc(sizeof(int) * maxp);
+    for(int i = 0; i < maxp; i++){
+        pid_list[i] = -1;
+    }
+    return pid_list;
+}
+
+int set_pid(int *pid_list){
+    for (int i = 0; i < maxp; i++)
+    {
+        if (pid_list[i] == -1)
+        {
+            pid_list[i] = i;
+            return i;
+        }
+    }
+}
 
 void* p_thread_func(void *arg){
     PCB *pcb = (PCB*)arg;
@@ -58,19 +78,58 @@ void* p_thread_func(void *arg){
         pcb->next_CPU_burst_length = burst_len;
     }
     //TODO: Enqueue the PCB into the ready queue
-    thread_count--;
+    current_thread_count--;
     pthread_exit(NULL);
 }
 
 //TODO: Implement the function that will generate new processes
 void* generate_processes(void *arg){
-    while (thread_count < allp){
-        PCB *pcb = (PCB*)malloc(sizeof(PCB));
-        pthread_create(&pcb->thread_id, NULL, p_thread_func, pcb);
-        pthread_join(pcb->thread_id, NULL);
-        thread_count++;
+    int total_thread_count = 0;
+    
+    if (allp < 10)
+    {
+       for (int i = 0; i < maxp; i++)
+       {
+            PCB *pcb = (PCB*)malloc(sizeof(PCB));
+            int temp = set_pid(pid_list);
+            pcb->pid = temp;
+            pthread_create(&threads[temp], NULL, p_thread_func, (void*) pcb);
+            pthread_join(threads[temp], NULL);
+            current_thread_count++;
+            total_thread_count++;
+       }            
+    } else{
+        for (size_t i = 0; i < 10; i++)
+        {
+            PCB *pcb = (PCB*)malloc(sizeof(PCB));
+            int temp = set_pid(pid_list);
+            pcb->pid = temp;
+            pthread_create(&threads[temp], NULL, p_thread_func, (void*) pcb);
+            pthread_join(threads[temp], NULL);
+            current_thread_count++;
+            total_thread_count++;
+        }
     }
-    pthread_exit(NULL);
+
+    while (total_thread_count < allp)
+    {
+        usleep(5000);
+        current_time += 5;
+        if (current_thread_count < maxp)
+        {
+            int rand_num = rand() % 100;
+            if (rand_num < pg * 100)
+            {
+                PCB *pcb = (PCB*)malloc(sizeof(PCB));
+                pcb->pid = total_thread_count; //TODO: available pid finder for threads will be used here
+                pthread_create(&threads[total_thread_count], NULL, p_thread_func, (void*) pcb);
+                pthread_join(threads[total_thread_count], NULL);
+                current_thread_count++;
+                total_thread_count++;
+            }
+        }
+    }
+    return NULL;
 }
 
 //TODO: Implement the cpu scheduler
