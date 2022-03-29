@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include "scheduler_defs.h"
 
+
 //NODE DEFINITIONS AND METHODS
 
 //Definition for the structure of a node in a queue
@@ -13,9 +14,9 @@ typedef struct node{
     struct node* prev;
 }node;
 
-//Method to create a new node
-//requires a pcb parameter as data for the node
-//returns a node pointer
+//Method: create a new node
+//Parameter: PCB
+//Return: node pointer
 node* create_node(PCB process_data){
     node* node = (struct node*) malloc(sizeof(struct node));
     node->next = NULL;
@@ -24,9 +25,9 @@ node* create_node(PCB process_data){
     return node;
 }
 
-//Method to print a node
-//requires a node pointer parameter
-//returns void
+//Method: print a node to console
+//Parameters: node pointer
+//Return: void
 void print_node(node* node){
     printf("%d", node->process_data);
 }
@@ -41,53 +42,139 @@ typedef struct queue{
     struct node* back;
 }queue;
 
-//Method to check if the queue is empty or not
-//requires a queue pointer parameter
-//returns boolean
+//Method: check if queue is empty
+//Parameters: queue pointer
+//Return: boolean
 bool isEmpty(struct queue* queue){
     return queue->front == NULL;
 }
 
-//Method to create a new queue
-//no parameter required
-//returns a queue pointer
+//Method: create a new queue
+//Parameters: -
+//Return: queue pointer
 queue* create_queue(){
     queue* queue = (struct queue*) malloc(sizeof(struct queue));
     queue->front = NULL;
     queue->back = NULL;
 }
 
-//Method to create a new queue
-//a node pointer parameter as the front node is required
-//returns a queue pointer
-queue* create_queue(node* front_node){
+//Method: create a new queue
+//Parameters: node pointer
+//Return: queue pointer
+queue* create_queue(struct node* front_node){
     queue* queue = (struct queue*) malloc(sizeof(struct queue));
     queue->front = front_node;
     queue->back = NULL;
 }
 
-//Method to create a new queue
-//two node pointer parameters as the front and the back node is required
-//returns a queue pointer
+//Method: create a new queue
+//Parameters: node pointer, node pointer
+//Return: queue pointer
 queue* create_queue(node* front_node, node* back_node){
     queue* queue = (struct queue*) malloc(sizeof(struct queue));
     queue->front = front_node;
     queue->back = back_node;
 }
 
+//Method: enqueue the PCBs according to the sjf scheduling algorithm
+//Parameters: queue pointer, PCB pointer
+//Return: void
+void sjf_enqueue(struct queue* queue, struct PCB* process_data){
+        struct node* node = (struct node *)malloc(sizeof(struct node));
+        node->process_data = *process_data;
+        node->next = NULL;
+        node->prev = NULL;
 
+        if (isEmpty(queue)){
+            queue->front = node;
+            queue->back = node;
+        }else{
+            struct node* holder = queue->front;
+            while (holder && holder->process_data.next_CPU_burst_length < process_data->next_CPU_burst_length){
+                holder = holder->next;
+            }
+           
+            if (holder == queue->front){
+                node->next = queue->front;
+                queue->front->prev = node;
+                queue->front = node;
+            }else if (holder == NULL){
+                queue->back->next = node;
+                node->prev = queue->back;
+                queue->back = node;
+            }else{
+                node->next = holder;
+                holder->prev->next = node;
+                node->prev = holder->prev;
+                holder->prev = node;
+            }
+        }
+}
 
-// TODO: Implement the enqueue method according to the scheduling algorithm parameter.
-// TODO: Implement the dequeue method
-// TODO: Implement the destroy node method
-// TODO: Implement the destroy queue method
-// FIXME: Fix the comments as Method:, Parameters:, Return:  
+//Method: enqueue the PCBs according to the rr or fcfs scheduling algorithms
+//Parameters: queue pointer, PCB pointer
+//Return: void
+void rr_fcfs_enqueue(struct queue* queue, struct PCB* process_data){
+        struct node* node = (struct node *)malloc(sizeof(struct node));
+        node->process_data = *process_data;
+        node->next = NULL;
+        node->prev = NULL;
+        
+        if (isEmpty(queue)){
+            queue->front = node;
+            queue->back = node;
+        }else{
+            struct node* holder = queue->back;
+            holder->next = node;
+            node->prev = queue->back;
+            holder = node;
+        }
+}
 
+//Method: enqueue according to the selected algorithm
+//Parameters: queue pointer, PCB pointer, scheduling_algorithm
+//Return: void
+void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algorithm algorithm){
+    if(algorithm == SJF){
+        sjf_enqueue(queue, process_data);
+    }else{
+        rr_fcfs_enqueue(queue, process_data);
+    }
+}
 
+//Method: dequeue a node
+//Parameters: node pointer
+//Return: node pointer
+node* dequeue(struct queue* queue){
+    if(isEmpty(queue)){
+        return NULL;
+    }else{
+        struct node *holder = queue->front;
+        queue->front = queue->front->next;
+        return holder;
+    }
+}
 
-//Method to print a queue
-//requires a queue pointer parameter
-//returns void
+//Method: freeing the node memory
+//Parameters: node pointer
+//Return: void
+void destroy_node(struct node* node){
+    free(node);
+}
+
+//Method: freeing the queue memory
+//Parameters: queue pointer
+//Return: void
+void destroy_queue(struct queue* queue){
+    while(!isEmpty(queue)){
+        destroy_node(dequeue(queue));
+    }
+    free(queue);
+}
+
+//Method: print a queue
+//Parameters: queue pointer
+//Return: void
 void print_queue(queue* queue){
     if(!isEmpty(queue)){
         node* node_ptr = queue->front;
