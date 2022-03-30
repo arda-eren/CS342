@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pthread.h>
-#include "scheduler_defs.h"
+#include "queue_impl.h"
 
 scheduling_algorithm alg; //Scheduling algorithm type
 int q; //Time quantum
@@ -23,7 +23,7 @@ int allp; //Number of threads that will be created until simulation ends
 int outmode; //Output mode
 
 pthread_t *threads; //Array of threads
-//queue *ready_queue; //Ready queue
+queue *ready_queue; //Ready queue
 //queue *io1_queue; //IO queue for device 1
 //queue *io2_queue; //IO queue for device 2
 pthread_mutex_t mutex_rq; //Mutex for threads in ready queue
@@ -59,7 +59,7 @@ void* p_thread_func(void *arg){
     }
 
     printf("Thread with pid: %d\n", pcb->pid);
-    //TODO: Enqueue the PCB into the ready queue
+    enqueue(ready_queue, pcb, alg);
     current_thread_count--;
     pthread_exit(NULL);
     return NULL;
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]){
             return 1;
         }
 
-        if(argv[15] >= 1 || argv[15] <= 3){
+        if((int)argv[15] >= 1 || (int)argv[15] <= 3){
             outmode = atoi(argv[15]);
         } else {
             printf("Invalid outmode argument\n");
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]){
         }
 
         printf("Valid arguments\n");
-        
+        ready_queue = create_queue();
         threads = (pthread_t*)malloc(sizeof(pthread_t) * allp);
         pthread_t process_generator; //Process generator thread
         pthread_t scheduler; //CPU scheduler thread
@@ -193,6 +193,7 @@ int main(int argc, char *argv[]){
 
         pthread_create(&scheduler, NULL, &cpu_scheduler, NULL);
         pthread_join(scheduler, NULL);
+        print_queue(ready_queue);
     }
     return 1;
 }

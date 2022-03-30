@@ -29,7 +29,7 @@ node* create_node(PCB process_data){
 //Parameters: node pointer
 //Return: void
 void print_node(node* node){
-    printf("%d", node->process_data);
+    printf("%d\n", node->process_data.pid);
 }
 
 
@@ -45,7 +45,7 @@ typedef struct queue{
 //Method: check if queue is empty
 //Parameters: queue pointer
 //Return: boolean
-bool isEmpty(struct queue* queue){
+int isEmpty(struct queue* queue){
     return queue->front == NULL;
 }
 
@@ -56,79 +56,7 @@ queue* create_queue(){
     queue* queue = (struct queue*) malloc(sizeof(struct queue));
     queue->front = NULL;
     queue->back = NULL;
-}
-
-//Method: create a new queue
-//Parameters: node pointer
-//Return: queue pointer
-queue* create_queue(struct node* front_node){
-    queue* queue = (struct queue*) malloc(sizeof(struct queue));
-    queue->front = front_node;
-    queue->back = NULL;
-}
-
-//Method: create a new queue
-//Parameters: node pointer, node pointer
-//Return: queue pointer
-queue* create_queue(node* front_node, node* back_node){
-    queue* queue = (struct queue*) malloc(sizeof(struct queue));
-    queue->front = front_node;
-    queue->back = back_node;
-}
-
-//Method: enqueue the PCBs according to the sjf scheduling algorithm
-//Parameters: queue pointer, PCB pointer
-//Return: void
-void sjf_enqueue(struct queue* queue, struct PCB* process_data){
-        struct node* node = (struct node *)malloc(sizeof(struct node));
-        node->process_data = *process_data;
-        node->next = NULL;
-        node->prev = NULL;
-
-        if (isEmpty(queue)){
-            queue->front = node;
-            queue->back = node;
-        }else{
-            struct node* holder = queue->front;
-            while (holder && holder->process_data.next_CPU_burst_length < process_data->next_CPU_burst_length){
-                holder = holder->next;
-            }
-           
-            if (holder == queue->front){
-                node->next = queue->front;
-                queue->front->prev = node;
-                queue->front = node;
-            }else if (holder == NULL){
-                queue->back->next = node;
-                node->prev = queue->back;
-                queue->back = node;
-            }else{
-                node->next = holder;
-                holder->prev->next = node;
-                node->prev = holder->prev;
-                holder->prev = node;
-            }
-        }
-}
-
-//Method: enqueue the PCBs according to the rr or fcfs scheduling algorithms
-//Parameters: queue pointer, PCB pointer
-//Return: void
-void fifo_enqueue(struct queue* queue, struct PCB* process_data){
-        struct node* node = (struct node *)malloc(sizeof(struct node));
-        node->process_data = *process_data;
-        node->next = NULL;
-        node->prev = NULL;
-        
-        if (isEmpty(queue)){
-            queue->front = node;
-            queue->back = node;
-        }else{
-            struct node* holder = queue->back;
-            holder->next = node;
-            node->prev = queue->back;
-            holder = node;
-        }
+    return queue;
 }
 
 //Method: enqueue according to the selected algorithm
@@ -136,9 +64,54 @@ void fifo_enqueue(struct queue* queue, struct PCB* process_data){
 //Return: void
 void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algorithm algorithm){
     if(algorithm == SJF){
-        sjf_enqueue(queue, process_data);
+        node* temp = queue->front;
+        struct node *added_node = (struct node *)malloc(sizeof(struct node));
+        added_node->process_data = *process_data;
+        added_node->next = NULL;
+        added_node->prev = NULL;
+        if (isEmpty(queue))
+        {
+            queue->front = added_node;
+            queue->back  = added_node;
+        } else {
+            while (temp && temp->process_data.remaining_CPU_burst_length < added_node->process_data.remaining_CPU_burst_length)
+            {
+                temp = temp->next;
+            }
+            if (!temp)
+            {
+                queue->back->next = added_node;
+                added_node->prev = queue->back;
+                queue->back = added_node;
+            } else if (temp == queue->front)
+            {
+                added_node->next = queue->front;
+                queue->front->prev = added_node;
+                queue->front = added_node;
+            } else
+            {
+                added_node->next = temp;
+                temp->prev->next = added_node;
+                added_node->prev = temp->prev;
+                temp->prev = added_node;
+            }
+        }       
     }else{
-        fifo_enqueue(queue, process_data);
+        node* temp = queue->back;
+        struct node *added_node = (struct node *)malloc(sizeof(struct node));
+        added_node->process_data = *process_data;
+        added_node->next = NULL;
+        added_node->prev = NULL;
+        if (isEmpty(queue))
+        {
+            queue->front = added_node;
+            queue->back  = added_node;
+        } else {
+            temp->next = added_node;
+            added_node->prev = queue->back;
+            queue->back = added_node;
+        }
+        
     }
 }
 
@@ -177,13 +150,16 @@ void destroy_queue(struct queue* queue){
 //Parameters: queue pointer
 //Return: void
 void print_queue(queue* queue){
-    if(!isEmpty(queue)){
-        node* node_ptr = queue->front;
-        while(node_ptr->next != NULL){
-            print_node(node_ptr);
-            node_ptr = node_ptr->next;
+    if (isEmpty(queue)){
+        printf("Queue is empty\n");
+    } else {
+        struct node* holder = queue->front;
+        while(holder){
+            printf("%d\n", holder->process_data.pid);
+            holder = holder->next;
         }
     }
+    
 }
 
 
