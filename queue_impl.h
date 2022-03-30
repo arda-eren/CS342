@@ -114,7 +114,7 @@ void sjf_enqueue(struct queue* queue, struct PCB* process_data){
 //Method: enqueue the PCBs according to the rr or fcfs scheduling algorithms
 //Parameters: queue pointer, PCB pointer
 //Return: void
-void rr_fcfs_enqueue(struct queue* queue, struct PCB* process_data){
+void fifo_enqueue(struct queue* queue, struct PCB* process_data){
         struct node* node = (struct node *)malloc(sizeof(struct node));
         node->process_data = *process_data;
         node->next = NULL;
@@ -138,7 +138,7 @@ void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algo
     if(algorithm == SJF){
         sjf_enqueue(queue, process_data);
     }else{
-        rr_fcfs_enqueue(queue, process_data);
+        fifo_enqueue(queue, process_data);
     }
 }
 
@@ -147,6 +147,7 @@ void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algo
 //Return: node pointer
 node* dequeue(struct queue* queue){
     if(isEmpty(queue)){
+        printf("Queue is empty\n");
         return NULL;
     }else{
         struct node *holder = queue->front;

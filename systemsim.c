@@ -121,6 +121,7 @@ int main(int argc, char *argv[]){
         return 1;
     } 
     else {
+
         if (strcmp(argv[1], "FCFS") == 0){
             alg = FCFS;
         } else if (strcmp(argv[1], "SJF") == 0){
@@ -131,6 +132,7 @@ int main(int argc, char *argv[]){
             printf("Invalid scheduling algorithm\n");
             return 1;
         }
+
         if (strcmp(argv[2], "INF"))
         {
             q = 1;
@@ -140,22 +142,26 @@ int main(int argc, char *argv[]){
         
         t1 = atoi(argv[3]);
         t2 = atoi(argv[4]);
+
         if (strcmp(argv[5], "uniform") != 0 && strcmp(argv[5], "exponential") != 0 && strcmp(argv[5], "fixed") != 0){
             printf("Invalid burst distribution argument\n");
             return 1;
         } else {
             burst_dist = argv[5];
         }
+
         min_burst = atoi(argv[6]);
         max_burst = atoi(argv[7]);
         burst_len = atoi(argv[8]);
         p0 = atof(argv[9]);
         p1 = atof(argv[10]);
         p2 = atof(argv[11]);
+
         if (p0 + p1 + p2 != 1){
             printf("Invalid p0, p1, p2 arguments\n");
             return 1;
         }
+
         pg = atof(argv[12]);
         maxp = atoi(argv[13]);
         allp = atoi(argv[14]);
@@ -173,9 +179,8 @@ int main(int argc, char *argv[]){
         }
 
         printf("Valid arguments\n");
+        
         threads = (pthread_t*)malloc(sizeof(pthread_t) * allp);
-        printf("Threads allocated\n"); 
-        printf("Pid_list initialized");
         pthread_t process_generator; //Process generator thread
         pthread_t scheduler; //CPU scheduler thread
         pthread_create(&process_generator, NULL, &generate_processes, NULL);
