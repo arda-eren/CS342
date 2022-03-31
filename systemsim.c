@@ -89,7 +89,7 @@ void* pthread_func(void *arg){
     pthread_mutex_lock(&mutex_rq);
     enqueue(ready_queue, pcb, alg);
     pcb->last_ready_queue_enterance = current_time;
-    printf("Thread with pid: %d enqueued at %d\n", pcb->pid, current_time);
+    printf("Thread with pid: %d enqueued at %d\n\n", pcb->pid, current_time);
     pthread_mutex_unlock(&mutex_rq);
     pthread_cond_broadcast(&cond_rq);
     
@@ -105,7 +105,7 @@ void* pthread_func(void *arg){
         }
         pthread_mutex_unlock(&mutex_rq);
         pthread_mutex_lock(&mutex_rq);
-        printf("Thread with pid: %d dequeued at %d\n", pcb->pid, current_time);
+        printf("Thread with pid: %d dequeued at %d\n\n", pcb->pid, current_time);
         node *holding_node = dequeue(ready_queue);
         PCB *temp_pcb = &(holding_node->process_data);
         temp_pcb->time_in_ready_queue = current_time - temp_pcb->last_ready_queue_enterance;
@@ -123,10 +123,11 @@ void* pthread_func(void *arg){
             temp_pcb->total_time_in_cpu += temp_pcb->next_CPU_burst_length ;
             current_time += temp_pcb->next_CPU_burst_length;
             usleep(temp_pcb->next_CPU_burst_length * 1000);
-            printf("Thread %d is running at time: %d\n", temp_pcb->pid, current_time);
+            printf("Thread %d is running at time: %d\n\n", temp_pcb->pid, current_time);
             pthread_mutex_lock(&mutex_rq);
             if (temp_pcb->remaining_CPU_burst_length != 0){
                 enqueue(ready_queue, temp_pcb, alg);
+                printf("Thread %d enqueued after running in CPU at %d\n\n", temp_pcb->pid, current_time);
                 temp_pcb->last_ready_queue_enterance = current_time;
             }
             cpu_thread_count--;
@@ -143,7 +144,7 @@ void* pthread_func(void *arg){
             current_time += temp_pcb->next_CPU_burst_length;
             usleep(temp_pcb->next_CPU_burst_length * 1000);
             temp_pcb->remaining_CPU_burst_length = 0;
-            printf("Thread %d is running at time: %d\n", temp_pcb->pid, current_time);
+            printf("Thread %d is running at time: %d\n\n", temp_pcb->pid, current_time);
             cpu_thread_count--;
             pthread_cond_broadcast(&cond_rq);
         }
@@ -169,12 +170,13 @@ void* pthread_func(void *arg){
             temp_pcb->device1_io_counter++;
             current_time += t1;
             io1_thread_count--;
-            printf("Thread %d finished using IO1 at time: %d\n", temp_pcb->pid, current_time);
+            printf("Thread %d finished using IO1 at time: %d\n\n", temp_pcb->pid, current_time);
             pthread_mutex_unlock(&mutex_io1);
             pthread_cond_signal(&cond_io1);
             pthread_mutex_lock(&mutex_rq);
             temp_pcb->process_state = READY;
             enqueue(ready_queue, temp_pcb, alg);
+            printf("Thread %d enqueued after using IO1 at %d\n\n", temp_pcb->pid, current_time);
             temp_pcb->last_ready_queue_enterance = current_time;
             pthread_mutex_unlock(&mutex_rq);
             calculate_next_CPU_burst(temp_pcb, alg);
@@ -194,12 +196,13 @@ void* pthread_func(void *arg){
             temp_pcb->device2_io_counter++;
             current_time += t2;
             io2_thread_count--;
-            printf("Thread %d finished using IO2 at time: %d\n", temp_pcb->pid, current_time);
+            printf("Thread %d finished using IO2 at time: %d\n\n", temp_pcb->pid, current_time);
             pthread_mutex_unlock(&mutex_io2);
             pthread_cond_signal(&cond_io2);
             pthread_mutex_lock(&mutex_rq);
             temp_pcb->process_state = READY;
             enqueue(ready_queue, temp_pcb, alg);
+            printf("Thread %d enqueued after using IO2 at %d\n\n", temp_pcb->pid, current_time);
             temp_pcb->last_ready_queue_enterance = current_time;
             pthread_mutex_unlock(&mutex_rq);
             calculate_next_CPU_burst(temp_pcb, alg);
@@ -208,7 +211,7 @@ void* pthread_func(void *arg){
     }
     threads_remaining--;
     current_thread_count--;
-    printf("Thread %d is exiting at time: %d\n", pcb->pid, current_time);
+    printf("Thread %d exited at time: %d\n\n", pcb->pid, current_time);
     pthread_exit(NULL);
     return NULL;
 }
