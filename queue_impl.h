@@ -59,59 +59,66 @@ queue* create_queue(){
     return queue;
 }
 
+//Method: enqueue according to the SJF algorithm
+//Parameters: queue pointer, PCB pointer
+//Return: void
+void sjf_enqueue(struct queue* queue, struct PCB* process_data){
+    node* temp = queue->front;
+    struct node *added_node = (struct node *)malloc(sizeof(struct node));
+    added_node->process_data = *process_data;
+    added_node->next = NULL;
+    added_node->prev = NULL;
+    if(isEmpty(queue)){
+        queue->front = added_node;
+        queue->back  = added_node;
+    }else{
+        while(temp && temp->process_data.remaining_CPU_burst_length < added_node->process_data.remaining_CPU_burst_length){
+            temp = temp->next;
+        }
+        if(!temp){
+            queue->back->next = added_node;
+            added_node->prev = queue->back;
+            queue->back = added_node;
+        }else if (temp == queue->front){
+            added_node->next = queue->front;
+            queue->front->prev = added_node;
+            queue->front = added_node;
+        }else{
+            added_node->next = temp;
+            temp->prev->next = added_node;
+            added_node->prev = temp->prev;
+            queue->back = added_node;
+        }
+    }
+}
+
+//Method: enqueue according to the FCFS and RR algorithms
+//Parameters: queue pointer, PCB pointer
+//Returns: void 
+void fcfs_rr_enqueue(struct queue* queue, struct PCB* process_data){
+    node* temp = queue->back;
+    struct node *added_node = (struct node *)malloc(sizeof(struct node));
+    added_node->process_data = *process_data;
+    added_node->next = NULL;
+    added_node->prev = NULL;
+    if(isEmpty(queue)){
+        queue->front = added_node;
+        queue->back  = added_node;
+    }else{
+        temp->next = added_node;
+        added_node->prev = queue->back;
+        queue->back = added_node;
+    }
+}
+
 //Method: enqueue according to the selected algorithm
 //Parameters: queue pointer, PCB pointer, scheduling_algorithm
 //Return: void
 void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algorithm algorithm){
     if(algorithm == SJF){
-        node* temp = queue->front;
-        struct node *added_node = (struct node *)malloc(sizeof(struct node));
-        added_node->process_data = *process_data;
-        added_node->next = NULL;
-        added_node->prev = NULL;
-        if (isEmpty(queue))
-        {
-            queue->front = added_node;
-            queue->back  = added_node;
-        } else {
-            while (temp && temp->process_data.remaining_CPU_burst_length < added_node->process_data.remaining_CPU_burst_length)
-            {
-                temp = temp->next;
-            }
-            if (!temp)
-            {
-                queue->back->next = added_node;
-                added_node->prev = queue->back;
-                queue->back = added_node;
-            } else if (temp == queue->front)
-            {
-                added_node->next = queue->front;
-                queue->front->prev = added_node;
-                queue->front = added_node;
-            } else
-            {
-                added_node->next = temp;
-                temp->prev->next = added_node;
-                added_node->prev = temp->prev;
-                queue->back = added_node;
-            }
-        }       
+        sjf_enqueue(queue, process_data);     
     }else{
-        node* temp = queue->back;
-        struct node *added_node = (struct node *)malloc(sizeof(struct node));
-        added_node->process_data = *process_data;
-        added_node->next = NULL;
-        added_node->prev = NULL;
-        if (isEmpty(queue))
-        {
-            queue->front = added_node;
-            queue->back  = added_node;
-        } else {
-            temp->next = added_node;
-            added_node->prev = queue->back;
-            queue->back = added_node;
-        }
-        
+        fcfs_rr_enqueue(queue, process_data);
     }
 }
 
