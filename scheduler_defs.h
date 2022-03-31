@@ -8,7 +8,10 @@
 typedef enum process_state{
     WAITING,
     READY,
-    RUNNING
+    RUNNING,
+    TERMINATED,
+    USING_IO1,
+    USING_IO2
 }process_state;
 
 //Definition for the process control block
@@ -26,6 +29,7 @@ typedef struct PCB{
     int start_time;
     int finish_time;
     int total_time_in_cpu;
+    int last_ready_queue_enterance;
 }PCB;
 
 

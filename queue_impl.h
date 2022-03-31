@@ -93,7 +93,7 @@ void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algo
                 added_node->next = temp;
                 temp->prev->next = added_node;
                 added_node->prev = temp->prev;
-                temp->prev = added_node;
+                queue->back = added_node;
             }
         }       
     }else{
