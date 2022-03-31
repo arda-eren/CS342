@@ -190,7 +190,7 @@ void* pthread_func(void *arg){
                 pthread_cond_wait(&cond_io2, &mutex_io2);
             }
             temp_pcb->process_state = USING_IO2;
-            io1_thread_count++;
+            io2_thread_count++;
             printf("Thread %d is using IO2 at time: %d\n\n", temp_pcb->pid, current_time);
             usleep(t2 * 1000);
             temp_pcb->device2_io_counter++;
