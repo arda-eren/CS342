@@ -92,7 +92,7 @@ void* pthread_func(void *arg){
     printf("Thread with pid: %d at %d\n", pcb->pid, current_time);
     pthread_mutex_unlock(&mutex_rq);
     pthread_cond_broadcast(&cond_rq);
-
+    
     while (pcb->process_state != TERMINATED){
         pthread_mutex_lock(&mutex_rq);
         while (cpu_thread_count > 0 && pcb->pid != cpu_thread_pid && cpu_thread_pid != -1){
@@ -150,6 +150,7 @@ void* pthread_func(void *arg){
         int cpu_decision_prob = rand() % 100;
         if (cpu_decision_prob < p0 * 100)
         {
+            pcb->process_state = TERMINATED;    
             temp_pcb->process_state = TERMINATED;
             pthread_cond_broadcast(&cond_rq);
         }
@@ -215,7 +216,7 @@ void* pthread_func(void *arg){
 void* generate_processes(void *arg){
     int total_thread_count = 0;
     cpu_thread_pid = -1;
-    if (allp < 10)
+    if (maxp < 10)
     {
        for (int i = 0; i < maxp; i++)
         {
@@ -252,10 +253,9 @@ void* generate_processes(void *arg){
             current_thread_count++;
             total_thread_count++;
         }
-        printf("First 10 created\n");
-        while (total_thread_count < allp)
+
+        while (total_thread_count != allp)
         {
-            printf("Total thread count: %d\n", total_thread_count);
             usleep(5000);
             current_time += 5;
             if (current_thread_count < maxp)
