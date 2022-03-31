@@ -89,13 +89,13 @@ void* pthread_func(void *arg){
     pthread_mutex_lock(&mutex_rq);
     enqueue(ready_queue, pcb, alg);
     pcb->last_ready_queue_enterance = current_time;
-    printf("Thread with pid: %d at %d\n", pcb->pid, current_time);
+    printf("Thread with pid: %d enqueued at %d\n", pcb->pid, current_time);
     pthread_mutex_unlock(&mutex_rq);
     pthread_cond_broadcast(&cond_rq);
     
     while (pcb->process_state != TERMINATED){
         pthread_mutex_lock(&mutex_rq);
-        while (cpu_thread_count > 0 && pcb->pid != cpu_thread_pid && cpu_thread_pid != -1){
+        while ((cpu_thread_count > 0 || pcb->pid != cpu_thread_pid) && cpu_thread_pid != -1){
             pthread_cond_wait(&cond_rq, &mutex_rq);
         }
         if (cpu_thread_pid == -1){
@@ -105,6 +105,7 @@ void* pthread_func(void *arg){
         }
         pthread_mutex_unlock(&mutex_rq);
         pthread_mutex_lock(&mutex_rq);
+        printf("Thread with pid: %d dequeued at %d\n", pcb->pid, current_time);
         node *holding_node = dequeue(ready_queue);
         PCB *temp_pcb = &(holding_node->process_data);
         temp_pcb->time_in_ready_queue = current_time - temp_pcb->last_ready_queue_enterance;
@@ -154,7 +155,7 @@ void* pthread_func(void *arg){
             temp_pcb->process_state = TERMINATED;
             pthread_cond_broadcast(&cond_rq);
         }
-        else if (cpu_decision_prob < (p0 + p1) * 100)
+        else if (cpu_decision_prob <= (p0 + p1) * 100)
         {
             pthread_mutex_lock(&mutex_io1);
             while (io1_thread_count > 0)
@@ -281,15 +282,18 @@ void* cpu_scheduler(void *arg){
     {
         if(threads_remaining == 0)
         {
+            printf("All threads have exited\n");
             break;
         } else {
             pthread_mutex_lock (&mutex_rq);
             while (cpu_thread_count > 0)
             {
+                //printf("Scheduler is waiting for CPU to finish\n");
                 pthread_cond_wait(&cond_rq, &mutex_rq);
             }
              if (ready_queue->front != NULL)
             {
+                //printf("Thread %d is scheduled at time: %d\n", ready_queue->front->process_data.pid, current_time);
                 cpu_thread_pid = ready_queue->front->process_data.pid;
             }
             else
@@ -383,9 +387,9 @@ int main(int argc, char *argv[]){
         pthread_t process_generator; //Process generator thread
         pthread_t scheduler; //CPU scheduler thread
         pthread_create(&process_generator, NULL, &generate_processes, NULL);
-        pthread_join(process_generator, NULL);
         pthread_create(&scheduler, NULL, &cpu_scheduler, NULL);
-        pthread_join(scheduler, NULL);
+        pthread_create(&scheduler, NULL, &cpu_scheduler, NULL);
+        pthread_join(process_generator, NULL);
 
         for (int i = 0; i < maxp; i++)
         {
