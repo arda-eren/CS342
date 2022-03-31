@@ -367,9 +367,8 @@ int main(int argc, char *argv[]){
             return 1;
         }
 
-        if((int)argv[15] >= 1 || (int)argv[15] <= 3){
-            outmode = atoi(argv[15]);
-        } else {
+        outmode = atoi(argv[15]);
+        if(outmode < 1 || outmode > 3){
             printf("Invalid outmode argument\n");
             return 1;
         }
