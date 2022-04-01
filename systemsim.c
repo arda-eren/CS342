@@ -126,6 +126,7 @@ void* pthread_func(void *arg){
             printf("Thread %d is running at time: %d\n\n", temp_pcb->pid, current_time);
             pthread_mutex_lock(&mutex_rq);
             if (temp_pcb->remaining_CPU_burst_length != 0){
+                temp_pcb->process_state = READY;
                 enqueue(ready_queue, temp_pcb, alg);
                 printf("Thread %d enqueued after running in CPU at %d\n\n", temp_pcb->pid, current_time);
                 temp_pcb->last_ready_queue_enterance = current_time;
@@ -220,7 +221,7 @@ void* pthread_func(void *arg){
 void* generate_processes(void *arg){
     int total_thread_count = 0;
     cpu_thread_pid = -1;
-    if (maxp < 10)
+    if (allp < 10)
     {
        for (int i = 0; i < maxp; i++)
         {
