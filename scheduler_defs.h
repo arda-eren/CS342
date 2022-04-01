@@ -26,10 +26,10 @@ typedef struct PCB{
     int time_in_ready_queue;
     int device1_io_counter;
     int device2_io_counter;
-    int start_time;
+    int arrival_time;
     int finish_time;
     int total_time_in_cpu;
-    int last_ready_queue_enterance;
+    int last_rq_enterance;
 }PCB;
 
 
