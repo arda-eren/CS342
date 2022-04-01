@@ -542,6 +542,7 @@ int main(int argc, char *argv[]){
         pthread_cond_destroy(&cond_io2);
         printf("All condition variables are destroyed.\n\n");
         free(threads);
+        free(burst_dist);
         printf("All arrays are destroyed.\n\n");
         destroy_queue(ready_queue);
         destroy_queue(final_queue);

@@ -95,7 +95,7 @@ void sjf_enqueue(struct queue* queue, struct PCB* process_data){
 //Method: enqueue according to the FCFS and RR algorithms
 //Parameters: queue pointer, PCB pointer
 //Returns: void 
-void fcfs_rr_enqueue(struct queue* queue, struct PCB* process_data){
+void fifo_enqueue(struct queue* queue, struct PCB* process_data){
     node* temp = queue->back;
     struct node *added_node = (struct node *)malloc(sizeof(struct node));
     added_node->process_data = *process_data;
@@ -118,7 +118,7 @@ void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algo
     if(algorithm == SJF){
         sjf_enqueue(queue, process_data);     
     }else{
-        fcfs_rr_enqueue(queue, process_data);
+        fifo_enqueue(queue, process_data);
     }
 }
 
@@ -167,6 +167,59 @@ void print_queue(queue* queue){
         }
     }
     
+}
+
+//Method: sort a queue according to ascending pid order
+//Parameters: queue pointer
+//Return: void
+void sortQueue(struct queue* queue)
+{
+    if (isEmpty(queue))
+    {
+        printf("Queue is empty\n");
+        return;
+    }
+    node *temp1 = queue->front;
+    while (temp1 != NULL)
+    {
+        node *temp2 = temp1->next;
+        while (temp2 != NULL)
+        {
+            if (temp1->process_data.pid > temp2->process_data.pid)
+            {
+                PCB data_holder = temp1->process_data;
+                temp1->process_data = temp2->process_data;
+                temp2->process_data = data_holder;
+            }
+            temp2 = temp2->next;
+        }
+        temp1 = temp1->next;
+    }
+}
+
+//Method: print data of each node in a queue
+//Parameters: queue pointer
+//Return: void
+void printQueueData(struct queue *queue)
+{
+    if (isEmpty(queue))
+    {
+        printf("Queue is empty\n");
+        return;
+    }
+
+    node *temp = queue->front;
+    printf("pid\tarv\tdept\tcpu\twaitr\tturna\tn-bursts\tn-d1\tn-d2\n");
+    while (temp != NULL)
+    {
+        printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t%d\n", temp->process_data.pid,
+               temp->process_data.arrival_time, temp->process_data.finish_time, temp->process_data.total_time_in_cpu,
+               (temp->process_data.finish_time - temp->process_data.arrival_time - temp->process_data.total_time_in_cpu),
+               temp->process_data.finish_time - temp->process_data.arrival_time,
+               temp->process_data.burst_count, temp->process_data.device1_io_counter, temp->process_data.device2_io_counter);
+        temp = temp->next;
+    }
+    printf("\n");
 }
 
 
