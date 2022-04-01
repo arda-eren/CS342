@@ -59,59 +59,66 @@ queue* create_queue(){
     return queue;
 }
 
-//Method: enqueue according to the selected algorithm
-//Parameters: queue pointer, PCB pointer, scheduling_algorithm
+//Method: enqueue according to the sjf algorithm
+//Parameters: queue pointer, PCB pointer
 //Return: void
-void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algorithm algorithm){
-    if(algorithm == SJF){
+void sjf_enqueue(struct queue* queue, struct PCB* process_data){
         node* temp = queue->front;
         struct node *added_node = (struct node *)malloc(sizeof(struct node));
-        added_node->process_data = *process_data;
-        added_node->next = NULL;
         added_node->prev = NULL;
-        if (isEmpty(queue))
-        {
-            queue->front = added_node;
-            queue->back  = added_node;
-        } else {
-            while (temp && temp->process_data.remaining_CPU_burst_length < added_node->process_data.remaining_CPU_burst_length)
-            {
+        added_node->next = NULL;
+        added_node->process_data = *process_data;
+
+        if(!isEmpty(queue)){
+            while (temp && temp->process_data.remaining_CPU_burst_length < added_node->process_data.remaining_CPU_burst_length){
                 temp = temp->next;
-            }
-            if (!temp)
-            {
+            }if(!temp){
                 queue->back->next = added_node;
                 added_node->prev = queue->back;
                 queue->back = added_node;
-            } else if (temp == queue->front)
-            {
+            }else if(temp == queue->front){
                 added_node->next = queue->front;
                 queue->front->prev = added_node;
                 queue->front = added_node;
-            } else
-            {
+            }else{
                 added_node->next = temp;
                 temp->prev->next = added_node;
                 added_node->prev = temp->prev;
                 queue->back = added_node;
             }
-        }       
-    }else{
-        node* temp = queue->back;
-        struct node *added_node = (struct node *)malloc(sizeof(struct node));
-        added_node->process_data = *process_data;
-        added_node->next = NULL;
-        added_node->prev = NULL;
-        if (isEmpty(queue))
-        {
-            queue->front = added_node;
-            queue->back  = added_node;
-        } else {
-            temp->next = added_node;
-            added_node->prev = queue->back;
+        }else{
             queue->back = added_node;
-        }
-        
+            queue->front = added_node;
+        }   
+}
+
+//Method: enqueue according to the fcs and rr algorithms
+//Parameters: queue pointer, PCB pointer
+//Return: void
+void rr_fcfs_enqueue(struct queue* queue, struct PCB* process_data){
+    node* temp = queue->back;
+    struct node *added_node = (struct node *)malloc(sizeof(struct node));
+    added_node->process_data = *process_data;
+    added_node->next = NULL;
+    added_node->prev = NULL;
+    if (isEmpty(queue)){
+        queue->front = added_node;
+        queue->back  = added_node;
+    }else{
+        temp->next = added_node;
+        added_node->prev = queue->back;
+        queue->back = added_node;
+    }
+}   
+
+//Method: enqueue according to the selected algorithm
+//Parameters: queue pointer, PCB pointer, scheduling_algorithm
+//Return: void
+void enqueue(struct queue* queue, struct PCB* process_data, enum scheduling_algorithm algorithm){
+    if(algorithm == SJF){
+        sjf_enqueue(queue, process_data);      
+    }else{
+        rr_fcfs_enqueue(queue, process_data);
     }
 }
 
@@ -159,7 +166,29 @@ void print_queue(queue* queue){
             holder = holder->next;
         }
     }
-    
+}
+
+
+//Method: printing the data of the ready queue
+//Parameters: queue pointer
+//Return: void
+void print_queue_data(struct queue *q){
+    if (!isEmpty(q)){
+        struct node *temp = q->front;
+        printf("pid\tarv\tdept\tcpu\twaitr\tturna\tn-bursts\tn-d1\tn-d2\n");
+        while (temp != NULL){
+            printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t\t%d\t%d\n", temp->process_data.pid,
+               temp->process_data.arr_time, temp->process_data.finish_time, temp->process_data.total_time_in_cpu,
+               (temp->process_data.finish_time - temp->process_data.arr_time - temp->process_data.total_time_in_cpu),
+               temp->process_data.finish_time - temp->process_data.arr_time,
+               temp->process_data.burst_count, temp->process_data.device1_io_counter, temp->process_data.device2_io_counter);
+            temp = temp->next;
+        }
+        printf("\n");
+    }else{
+        printf("Queue is empty\n");
+        return;
+    }
 }
 
 

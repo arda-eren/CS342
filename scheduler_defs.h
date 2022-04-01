@@ -15,7 +15,8 @@ typedef enum process_state{
 }process_state;
 
 //Definition for the process control block
-//holds information about the related thread
+//holds information about the related thread#include <sys/types.h>
+
 typedef struct PCB{
     int pid;
     pthread_t thread_id;
@@ -28,6 +29,7 @@ typedef struct PCB{
     int device2_io_counter;
     int start_time;
     int finish_time;
+    int arr_time;
     int total_time_in_cpu;
     int last_ready_queue_enterance;
 }PCB;
